@@ -256,11 +256,11 @@ def site(data,uid):#Основная функция, её надо вызыва�
             #Отладочная Строка! Удалить при добавлении к боту!
             print('Parsing: ',friend)#Отладочная Строка! Удалить при добавлении к боту!
             #Отладочная Строка! Удалить при добавлении к боту!
-            if True:#try:
+            try:
                 liked = GetPhotos(friend,target,target_id,session)
-            #except:
-                #print('Something wrong with this friend')
-                #continue
+            except:
+                print('Something wrong with this friend')
+                continue
             for like in liked:
                 #ret[str(counter)] = like
                 out_file.write(like+'\n')
