@@ -287,9 +287,7 @@ def main():
     site(targets,1)
 
 main()
-#dt = login(['89202600211','asd456zxc123asd456zxc123'])
-#session = dt[1]
-#print(GetId('https://vk.com/k.terekhov2013',session))#Адрес - страница, человека, чьи лайки парсим
+
 
 
 
