@@ -7,8 +7,8 @@ from selenium.webdriver import ChromeOptions
 import os
 import requests
 import json
-LOGIN = '89202600211'
-PASSWORD = 'asd456zxc123asd456zxc123'
+LOGIN = ''
+PASSWORD = ''
 
 def login(driver):
     global LOGIN,PASSWORD
