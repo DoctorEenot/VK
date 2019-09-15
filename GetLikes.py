@@ -1,14 +1,22 @@
+down = True
 import requests
 import lxml.html
 from bs4 import BeautifulSoup
 import re
 import sys
+from termcolor import colored
+try:
+    from image_downloader import main as img_download
+except:
+    down = False
+    print('Couldn`t find image_downloader module')
+    
 
 
-LOGIN = ''
-PASSWORD = ''
-
-
+LOGIN = '89202600211'
+PASSWORD = 'asd456zxc123asd456zxc123'
+API_KEY = 'ade20df4ade20df4ade20df472ad8eefd9aade2ade20df4f09c0749fd81f31ce68d2a24'
+api_version = '5.89'
 
 def login(data):
     
@@ -72,8 +80,6 @@ def GetId(VkUrl,session):#Возвращает id пользователя, те
                 url = link.get('href')
                 try:
                     if (('photo' in url) and ('profile' in url)) or ('mvk_entrypoint' in url): #and ('profile' in url):
-                        #print('found')
-                        #print(url)
                         id = ''
                         string = url.replace('/photo','',1)
                         string_buf = list(string)
@@ -83,8 +89,6 @@ def GetId(VkUrl,session):#Возвращает id пользователя, те
                             id = id + string_buf[i]
                         break
                     elif ('/friends' in url) and ('id' in url):
-                        #print('friends')
-                        #print(url)
                         id = url[url.find('/friends?id=')+12:url.find('§')]
                         try:
                             res = re.search(r'\D',id)
@@ -98,62 +102,17 @@ def GetId(VkUrl,session):#Возвращает id пользователя, те
                     continue
     return id
 
-def GetFriends(VkUrl,session):#Возвращает список друзей, техническая функция, вызывать не надо.
-    #VkUrl - ссылка на аккаунт
-    #session - сессия залогиненного аккаунта
+def get_friends(VkUrl,session):
+    ret_buf = []
+    id = GetId(VkUrl,session)#id друга
+    res_users = requests.get(f'https://api.vk.com/method/friends.get?user_id={id}&access_token={API_KEY}&v={api_version}')
+    print('Found:',res_users.json()['response']['count'],'friends')
+    for fid in res_users.json()['response']['items']:
+        ret_buf.append('https://vk.com/id'+str(fid))
+    return ret_buf
     
-    #
-    headers = {#Заголовок пост запроса, необходим для получения страницы с друзьями
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        'Accept-Language':'ru-ru,ru;q=0.8,en-us;q=0.5,en;q=0.3',
-        'Accept-Encoding':'gzip, deflate',
-        'Connection':'keep-alive',
-        'Referer':VkUrl
 
-        }
-    
-    post_data = {#Данные для пост запроса
-        'act':'box',
-        'al':'1',
-        'al_ad':'0',
-        'oid':GetId(VkUrl,session),
-        'tab':'friends'
-        }
-    response = session.post('https://vk.com/al_page.php',headers = headers,data = post_data)
-    soup = BeautifulSoup(response.text, 'html.parser')
-    
-    return_buf = []
-    for link in soup.findAll('a',{'class':'fans_fan_lnk'}):
 
-        
-        return_buf.append('https://vk.com'+link.get('href'))
-        
-    offset = 120
-    Stop = False
-    for i in range(100):
-        if Stop:
-            break
-        post_data = {#Данные для пост запроса
-            'act':'box',
-            'al':'1',
-            'al_ad':'0',
-            'offset':offset,
-            'oid':id,
-            'tab':'friends'
-            }
-        response = session.post('https://vk.com/al_page.php',headers = headers,data = post_data)
-        soup = BeautifulSoup(response.text, 'html.parser')
-    
-        
-        for link in soup.findAll('a',{'class':'fans_fan_lnk'}):
-            if link.get('href') in return_buf:
-                    Stop = True
-                    break
-            return_buf.append('https://vk.com'+link.get('href'))
-    if return_buf == []:
-        return [{'Статус':'Либо у данного пользователя нет друзей, либо они скрыты'}] 
-    return return_buf
 
 def GetPhotos(VkUrl,targetUrl,target_id,session):#Получает фотографии со страницы человека, техническая функция, вызывать не надо.
     MaxPhotos = 100
@@ -248,27 +207,27 @@ def site(data,uid):#Основная функция, её надо вызыва�
         target_id = GetId(target,session)
         print(target_id+'.txt','File created')
         out_file = open(target_id+'.txt','w')
-        friends = GetFriends(target,session)
-        #counter = 1
-        #ret = dict()
+        friends = get_friends(target,session)
+        
         for friend in friends:
 
             #Отладочная Строка! Удалить при добавлении к боту!
-            print('Parsing: ',friend)#Отладочная Строка! Удалить при добавлении к боту!
+            print('Parsing: ',friend,end = '')#Отладочная Строка! Удалить при добавлении к боту!
             #Отладочная Строка! Удалить при добавлении к боту!
             try:
                 liked = GetPhotos(friend,target,target_id,session)
+                print(colored(' Parsed without problems','yellow'))
             except:
-                print('Something wrong with this friend')
+                print(colored(' Something wrong with this friend','red'))
                 continue
-            for like in liked:
-                #ret[str(counter)] = like
-                out_file.write(like+'\n')
-                #counter += 1
-        out_file.close()        
-        #ret_buffer.append(ret)
-    #return ret_buffer
-
+            for like in liked:                
+                out_file.write(like+'\n')                
+        out_file.close()
+        if down:
+            print('starting downloading liked pictures')
+            img_download([target_id+'.txt'])
+        else:
+            print('downloading images skiped, \ncouldn`t find module image_downloader')
 def usage():
     print('There must be links to pages')
     print('ex: GetLikes.py https://vk.com/restless_linker')
@@ -276,18 +235,26 @@ def usage():
 
 def main():
 
-    #try:
-    targets = sys.argv[1:]
-    #except:
-       #usage()
-       #return 1
+    try:
+        targets = sys.argv[1:]
+    except:
+       usage()
+       return 1
+    if targets == []:
+        usage()
+        return 1
     #print(targets)
     number_of_targets = len(targets)
     print('Working on '+str(number_of_targets)+' targets')
     site(targets,1)
 
-main()
-
+if __name__ == '__main__':
+    main()
+#dt = login(['89202600211','asd456zxc123asd456zxc123'])
+#session = dt[1]
+#print(dt[0])
+#print(len(get_friends('https://vk.com/miss.ari__1')))
+#print(GetId('https://vk.com/k.terekhov2013',session))#Адрес - страница, человека, чьи лайки парсим
 
 
 
