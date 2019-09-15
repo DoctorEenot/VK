@@ -35,7 +35,7 @@ def login(data,uid):
         return [{'Ошибка':'Сбой авторизации,сессия не создана'}]
    
 session = None
-dt = login(['79312354494','Yv7Pf1Tr'],1)
+dt = login(['79312354494',''],1)
 session = dt[1]
 def GetUrls_Posts(data,uid): #data - массив [url_страницы_человека , сессия_вк]
     #эта функция ищет посты в которых упоминается человек
