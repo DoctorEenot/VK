@@ -13,9 +13,9 @@ except:
     
 
 
-LOGIN = '89202600211'
-PASSWORD = 'asd456zxc123asd456zxc123'
-API_KEY = 'ade20df4ade20df4ade20df472ad8eefd9aade2ade20df4f09c0749fd81f31ce68d2a24'
+LOGIN = ''
+PASSWORD = ''
+API_KEY = ''
 api_version = '5.89'
 
 def login(data):
