@@ -197,7 +197,7 @@ def site(data,uid):#Основная функция, её надо вызыва�
     #В данном случае принимает только одну цель, её и парсит
     ret_buffer = []
     dt = login([LOGIN,PASSWORD])
-    
+    print(dt[0])
     if len(dt)<2:
         return dt
     
@@ -231,7 +231,7 @@ def site(data,uid):#Основная функция, её надо вызыва�
 def usage():
     print('There must be links to pages')
     print('ex: GetLikes.py https://vk.com/restless_linker')
-#Провека основной работоспособности:
+
 
 def main():
 
@@ -250,11 +250,7 @@ def main():
 
 if __name__ == '__main__':
     main()
-#dt = login(['89202600211','asd456zxc123asd456zxc123'])
-#session = dt[1]
-#print(dt[0])
-#print(len(get_friends('https://vk.com/miss.ari__1')))
-#print(GetId('https://vk.com/k.terekhov2013',session))#Адрес - страница, человека, чьи лайки парсим
+
 
 
 
