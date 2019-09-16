@@ -1,5 +1,6 @@
 import sys
 from time import sleep
+import time
 import lxml.html
 from bs4 import BeautifulSoup
 from selenium import webdriver
@@ -7,6 +8,7 @@ from selenium.webdriver import ChromeOptions
 import os
 import requests
 import json
+import threading
 LOGIN = ''
 PASSWORD = ''
 
@@ -44,12 +46,13 @@ def usage():
 
 def get_image_url(url,driver):
     driver.get(url)
-    #sleep(2)
-    for i in range(5):
+    #sleep(1)
+    for i in range(10):
         try:
             source_html = driver.find_element_by_xpath('//*[@id="pv_photo"]').get_attribute('innerHTML')
-        except:
-            sleep(0.2)
+        except Exception as e:
+            #print(e)
+            sleep(0.1)
             continue
         break
     try:
@@ -60,15 +63,18 @@ def get_image_url(url,driver):
 
 
 def save_image(source,path_name):
-    #print(source)
-    name = os.path.basename(source)
-    #print(name)
-    image = requests.get(source)
-    #print(image.code)
-    image_f = open(path_name+'\\'+name,'wb')
-    image_f.write(image.content)
-    image_f.close()
-
+    try:
+        #print(source)
+        name = os.path.basename(source)
+        #print(name)
+        image = requests.get(source)
+        #print(image.code)
+        image_f = open(path_name+'\\'+name,'wb')
+        image_f.write(image.content)
+        image_f.close()
+        print(' saved without problems')
+    except:
+        print(' couldn`t get image')
     
 def main(targets = None):
     if targets == None:
@@ -106,20 +112,21 @@ def main(targets = None):
             except:
                 continue
             try:
-                save_image(source,newpath)
+                t = threading.Thread(target = save_image,args=(source,newpath))
+                t.start()
+                #save_image(source,newpath)
             except:
-                print(' couldn`t get image')
+                #print(' couldn`t get image')
                 line = file.readline()
                 continue
-            print(' saved without problems')
+            #print(' saved without problems')
             line = file.readline()
 
 
 if __name__ == '__main__':
+    prev = time.time()
     main()
-#cookies = login([LOGIN,PASSWORD])
-#print(json.load)
-#browser = init_driver()  
-#source = get_image_url('https://vk.com/photo39020745_367241054',browser)
+    print('took time: ',time.time() - prev)
 
-#save_image(source,1)
+#223.08330178260803 - with threads
+
